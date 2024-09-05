@@ -40,7 +40,11 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework',
     'flights',
-
+    'users',
+    'payments',
+    'reviews',
+    'itinerary',
+    'destinations',
 ]
 
 MIDDLEWARE = [
@@ -125,3 +129,23 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#Handling cache data
+#test environment
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+
+# #production ready
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+#         'LOCATION': 'redis://127.0.0.1:6379/1',
+#     }
+# }
+              
