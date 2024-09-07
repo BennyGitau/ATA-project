@@ -60,7 +60,7 @@ class FlightsSearchView(APIView):
 
           #save the search query in database before making the request if the search query exists do not save
         if not SearchQuery.objects.filter(origin=origin, destination=destination, departure_date=departure_date, return_date=return_date).exists():
-            flight = SearchQuery.objects.create(
+            SearchQuery.objects.create(
                 origin=origin,
                 destination=destination,
                 departure_date=departure_date,
@@ -148,7 +148,6 @@ class FlightsSearchView(APIView):
 
                 booked_flight = Booking.objects.create(
                     flight_id=flight_to_book.get('id'),
-                    origin = flight_to_book.get('origin'),                    
                     origin=flight_to_book.get('origin'),
                     destination=flight_to_book.get('destination'),
                     departure_date=flight_to_book.get('departureDate'),
