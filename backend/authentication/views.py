@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 
 
 from .serializers import UserSerializer, UserProfileSerializer
-from backend.users.models import UserProfile
+from users.models import UserProfile
 
 
 # Create your views here.

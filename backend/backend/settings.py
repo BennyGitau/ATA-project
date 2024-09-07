@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'itinerary',
     'destinations',
     'authentication',
+    'corsheaders',
+    'assistant',
 ]
 
 MIDDLEWARE = [
