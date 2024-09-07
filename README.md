@@ -20,9 +20,11 @@
     - Frontend:
         * Create a flight search form.
         * Display search results with filters and sorting options.
+        * Display weather for the destination
     - Backend:
         * Integrate with flight APIs (e.g., Skyscanner, Amadeus).
         * Implement booking functionality with payment gateway integration.
+        * Integrate weather APIs(openweather)
     - Database:
         * Store search history and booking details.
 4. Destination Recommendations:
@@ -95,26 +97,31 @@ Focus on creating a clean, intuitive, and visually appealing user interface. Ens
     - Models: Custom user profiles (if needed).
     - Views: Registration, login, profile management.
     - Serializers: User serializers for registration and profile updates.
+
 2. flights: Manage flight search and booking.
 
     - Models: Flight search, booking information.
     - Views: Search flights, book flights.
-    - Serializers: Flight and booking serializers.
-3. destinations: Provide destination guides and recommendations.
+    - Serializers: Flight Chatbot interface for basic travel inquiries (e.g., FAQs)t and booking serializers.
+
+3. destinations: Provide destination guides and recommendations.(if neccessary)
 
     - Models: Destination information, guides.
     - Views: List destinations, detailed destination info.
     - Serializers: Destination serializers.
+
 4. itineraries: Plan and manage travel itineraries.
 
     - Models: Itinerary details, associated flights and destinations.
     - Views: Create, retrieve, update, and delete itineraries.
     - Serializers: Itinerary serializers.
+
 5. comments: Manage user comments and reviews.
 
     - Models: Comments on destinations or itineraries.
     - Views: Add, retrieve, and manage comments.
     - Serializers: Comment serializers.
+
 6. payments: Handle secure payments and transactions.
 
     - Models: Payment transactions, methods.
