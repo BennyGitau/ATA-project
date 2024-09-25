@@ -10,7 +10,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from amadeus import Client, Location, ResponseError
 
-from .serializers import FlightListSerializer, FlightSearchSerializer
+from .serializers import FlightBookingSerializer, FlightSearchSerializer
 from .models import SearchQuery, Booking
 from dotenv import load_dotenv
 import os
@@ -27,7 +27,8 @@ amadeus = Client(
     client_id=AMADEUS_API_KEY,
     client_secret=AMADEUS_API_SECRET
     )
-    
+
+flight_search_results = {} 
 class FlightsSearchView(APIView):
 
     @swagger_auto_schema(
@@ -40,29 +41,49 @@ class FlightsSearchView(APIView):
             },
     )
     
-    def get(self, request):  
+    def post(self, request):
+        serializer = FlightSearchSerializer(data=request.data) 
         
-        origin=request.query_params.get('origin') or 'JFK'
-        destination=request.query_params.get('destination') or 'NYC'
-        departure_date = request.query_params.get('departure_date') or None
-        return_date = request.query_params.get('return_date') or None
-        travel_class=request.query_params.get('travel_class') or None
-        tripPurpose = request.query_params.get('tripPurpose') or None
-        duration = request.query_params.get('duration') or None
-        one_way = request.query_params.get('one_way') or False
-        return_flight = request.query_params.get('return_flight') or False
-        airlines = request.query_params.get('airlines') or None
-        price = request.query_params.get('price') or None
+        if serializer.is_valid():
+            # Extract the validated data
+            origin = serializer.validated_data.get('origin')
+            destination = serializer.validated_data.get('destination')
+            departure_date = serializer.validated_data.get('departure_date')
+            return_date = serializer.validated_data.get('return_date') or None
+            travel_class = serializer.validated_data.get('travel_class') or None
+            tripPurpose = serializer.validated_data.get('tripPurpose') or None
+            duration = serializer.validated_data.get('duration') or None
+            one_way = serializer.validated_data.get('one_way') or None
+            return_flight = serializer.validated_data.get('return_flight') or None
+            airlines = serializer.validated_data.get('airlines') or None
+            price = serializer.validated_data.get('price') or None
+            
         
         #validate the required parameters
         # if not origin or not destination or not departure_date or not return_date:
         #     return Response({"error": "Missing required parameters"}, status=status.HTTP_400_BAD_REQUEST)
+        #get location code
+        def get_location_code(location):
+            try:
+                response = amadeus.reference_data.locations.get(
+                    subType='CITY,AIRPORT',
+                    keyword=location
+                    )
+                if response.data and len(response.data) > 0:
+                    # print(response.data[0]['iataCode'])
+                    return response.data[0]['iataCode']
+            except ResponseError:
+                return Response({"error":"location not found"})
 
+        originIataCode = get_location_code(origin)
+        destinationIataCode = get_location_code(destination)
           #save the search query in database before making the request if the search query exists do not save
         if not SearchQuery.objects.filter(origin=origin, destination=destination, departure_date=departure_date, return_date=return_date).exists():
             SearchQuery.objects.create(
                 origin=origin,
                 destination=destination,
+                originIataCode=originIataCode,
+                destinationIataCode=destinationIataCode,
                 departure_date=departure_date,
                 return_date=return_date,
                 travel_class=travel_class,
@@ -73,7 +94,9 @@ class FlightsSearchView(APIView):
                 airline=airlines,
                 price=price
             )
-        cache_key = f"flight_search_{origin}_{destination}_{departure_date}_{return_date}_{travel_class}_{tripPurpose}_{duration}_{one_way}_{return_flight}_{airlines}_{price}"
+        
+        #add departure_date to cache key and replace hyphens with underscores
+        cache_key = f"flight_search_{originIataCode}_{destinationIataCode}_{return_date}_{travel_class}_{tripPurpose}_{duration}_{one_way}_{return_flight}_{airlines}_{price}"
         cache_timeout = 60 * 60 # 1 hour
 
         cached_response = cache.get(cache_key)
@@ -83,9 +106,9 @@ class FlightsSearchView(APIView):
         #get the flight search data from amadeus
         try:
             response = amadeus.shopping.flight_offers_search.get(
-                originLocationCode='JFK',
-                destinationLocationCode='MAD',
-                departureDate='2024-11-01',
+                originLocationCode=originIataCode,
+                destinationLocationCode=destinationIataCode,
+                departureDate=departure_date.strftime('%Y-%m-%d'),
                 adults=1,
                 # returnDate='',
                 # travelClass='',
@@ -98,79 +121,207 @@ class FlightsSearchView(APIView):
                 # includedAirlineCodes='',
                 )
             response_data = response.data
-            print(response_data)
+            if response_data:
+                flight_search_results=response_data
+                cache.set(cache_key, response_data, cache_timeout)
+                print(flight_search_results)
+                return Response(response_data, status=status.HTTP_200_OK)
             #save the cache
-            cache.set(cache_key, response_data, cache_timeout)
         except ResponseError as error:
             return Response({"error": str(error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+ #flight offers search
+class FlightAvailabilityView(APIView):
+    @swagger_auto_schema(
+        operation_description="Flight availability",
+        request_body=FlightBookingSerializer,
+        responses={
+            200: FlightBookingSerializer(many=True),
+            404: openapi.Response(description="flight not found"),
+            500: openapi.Response(description="internal server error"),
+            },
+    )
+    def post(self, request):
+        serializer = FlightBookingSerializer(data=request.data) 
+        if serializer.is_valid():
+            travelers_data = serializer.create(serializer.validated_data)
+        
+        try:
+            '''
+            Confirm availability and price from SYD to BKK in summer 2022
+            '''
+            flights = amadeus.shopping.flight_offers_search.get(originLocationCode='SYD', destinationLocationCode='BKK',
+                                                                departureDate='2022-07-01', adults=1).data
+            response_one_flight = amadeus.shopping.flight_offers.pricing.post(
+                flights[0])
+            print(response_one_flight.data)
 
-        #book a flight
-        #get the index that user selects
-        if response_data and 'data' in response_data and len(response_data['data']) > 0:
-            flight_to_book = response_data['data'][0]  # Select the first flight for booking
+            response_two_flights = amadeus.shopping.flight_offers.pricing.post(
+                flights[0:2])
+            print(response_two_flights.data)
+        except ResponseError as error:
+            raise error
+        
+        # #flight availability search
 
-            # Extract flight offer ID
-            flight_offer_id = flight_to_book.get('id')
+        # try:
+        #     body = {
+        #         "originDestinations": [
+        #             {
+        #                 "id": "1",
+        #                 "originLocationCode": "MIA",
+        #                 "destinationLocationCode": "ATL",
+        #                 "departureDateTime": {
+        #                     "date": "2022-11-01"
+        #                 }
+        #             }
+        #         ],
+        #         "travelers": [
+        #             {
+        #                 "id": "1",
+        #                 "travelerType": "ADULT"
+        #             }
+        #         ],
+        #         "sources": [
+        #             "GDS"
+        #         ]
+        #     }
 
-            # Proceed with booking 
-            # add payment
-            try:
-                booking_response = amadeus.booking.flight_orders.post(
-                    data={
-                        'flightOffer': {
-                            'offerId': flight_offer_id,
-                            'travellers': [{'id': '1', 'dateOfBirth': '1990-01-01', 'surname': 'Doe', 'givenName': 'John'}],  # Example traveller details
-                            'pricingOptions': {'includedCheckedBagsOnly': True}
-                            #add more data
-                        }
-                    }
-                )
-                booking_data = booking_response.data
+        #     response = amadeus.shopping.availability.flight_availabilities.post(body)
+        #     print(response.data)
+        # except ResponseError as error:
+        #     raise error
+        
+        # #seatmap display of flight in an order    
+        # try:
+        #     '''
+        #     Retrieve the seat map of a flight present in an order
+        #     '''
+        #     response = amadeus.shopping.seatmaps.get(flightorderId='eJzTd9cPDPMwcooAAAtXAmE=')
+        #     print(response.data)
+        # except ResponseError as error:
+        #     raise error
 
-                # Save the selected flight details to BookedFlight model after booking
-                #update as per the returned response
-                # user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-                # origin = models.CharField(max_length=64, null=True, blank=True)
-                # destination = models.CharField(max_length=64, null=True, blank=True)
-                # departure_date= models.DateTimeField(null=True, blank=True)
-                # departure_time = models.DateTimeField(null=True, blank=True)
-                # return_date = models.DateTimeField(null=True, blank=True)
-                # duration = models.IntegerField(null=True, blank=True)
-                # one_way = models.BooleanField(default=False)
-                # return_flight = models.BooleanField(default=False)
-                # airline = models.CharField(max_length=64, null=True, blank=True)
-                # price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-                # seats = models.IntegerField(null=True, blank=True)
-                # num_tickets = models.IntegerField(null=True)
-                # passenger_names = models.CharField(max_length=255, null=True)
-                # contact_email = models.EmailField(null=True)
-                # payment_status = models.CharField(max_length=32, null=True)
 
-                booked_flight = Booking.objects.create(
+        # #seat map of a flight offer
+
+        # try:
+        #     '''
+        #     Retrieve the seat map of a given flight offer 
+        #     '''
+        #     body = amadeus.shopping.flight_offers_search.get(originLocationCode='MAD',
+        #                                                     destinationLocationCode='NYC',
+        #                                                     departureDate='2022-11-01',
+        #                                                     adults=1,
+        #                                                     max=1).result
+        #     response = amadeus.shopping.seatmaps.post(body)
+        #     print(response.data)
+        # except ResponseError as error:
+        #     raise error
+
+        #flight create order
+class FlightBookingView(APIView):
+    @swagger_auto_schema(
+        operation_description="Flight booking",
+        request_body=FlightBookingSerializer,
+        responses={
+            200: FlightBookingSerializer(many=True),
+            404: openapi.Response(description="flight not found"),
+            500: openapi.Response(description="internal server error"),
+            },
+    )
+    def post(self, request):
+        serializer = FlightBookingSerializer(data=request.data)
+
+        if serializer.is_valid():
+            travelers_data = serializer.create(serializer.validated_data)
+            flightOfferId = serializer.validated_data.get('flightOfferId')
+
+        flight_to_book = flight_search_results.get(flightOfferId)
+        if not flight_to_book:
+            return Response({"error": "Flight not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            # Flight Offers Price to confirm the price of the chosen flight
+            price_confirm = amadeus.shopping.flight_offers.pricing.post(
+                flight_to_book)
+
+            # Flight Create Orders to book the flight
+            book_flight = amadeus.booking.flight_orders.post(
+                flight_to_book, travelers_data)
+
+            response_data = book_flight.data
+            #before saving the booking data comfirm if booking is successful
+            if response_data  and len(response_data) > 0:
+                    booked_flight = Booking.objects.create(
                     flight_id=flight_to_book.get('id'),
-                    origin=flight_to_book.get('origin'),
-                    destination=flight_to_book.get('destination'),
-                    departure_date=flight_to_book.get('departureDate'),
-                    return_date=flight_to_book.get('returnDate'),
-                    price=flight_to_book.get('price'),
-                    travel_class=flight_to_book.get('travelClass'),
-                    airline=flight_to_book.get('airline'),
-                    duration=flight_to_book.get('duration'),
-                    one_way=flight_to_book.get('oneWay'),
-                    return_flight=flight_to_book.get('returnFlight'),
-                    seats=flight_to_book.get('seats'),
-                    num_tickets=flight_to_book.get('numTickets'),
-                    passenger_names=flight_to_book.get('passengerNames'),
-                    contact_email=flight_to_book.get('contactEmail'),
-                    payment_status=flight_to_book.get('paymentStatus'),
-                    booking_data=booking_data  # Save booking data if needed
+                    origin=flight_to_book.get('departure'),
+                    destination=flight_to_book.get('arrival'),
+                    departure_date=flight_to_book.get('departureDate') or None,
+                    return_date=flight_to_book.get('returnDate') or None,
+                    price=flight_to_book.get('price') or None,
+                    travel_class=flight_to_book.get('cabin') or None,
+                    airline=flight_to_book.get('airline') or None,
+                    duration=flight_to_book.get('duration') or None,
+                    one_way=flight_to_book.get('oneWay') or None,
+                    return_flight=flight_to_book.get('returnFlight') or None,
+                    seats=flight_to_book.get('seats') or None,
+                    num_tickets=flight_to_book.get('numTickets') or None,
+                    passenger_names=flight_to_book.get('passengerNames') or None,
+                    contact_email=flight_to_book.get('contactEmail') or None,
+                    payment_status=flight_to_book.get('paymentStatus') or None,
+                    # booking_data=booking_data  # Save booking data if needed
                 )
-                return Response({'message': 'Flight booked successfully', 'booked_flight': FlightSearchSerializer(booked_flight).data})
 
-            except ResponseError as error:
-                return Response({"error": str(error)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Flight booked successfully", "data": response_data})
+            # return Response({'message': 'Flight booked successfully', 'booked_flight': FlightSearchSerializer(booked_flight).data})
 
-        return Response({'error': 'No flights found'}, status=status.HTTP_404_NOT_FOUND)
+        except ResponseError as error:
+            raise error
+
+        #flight order management
+class FlightOrderView(APIView):
+    #flight order retrievement
+    def get(self, request):
+
+        try:
+            '''
+            # Retrieve the flight order based on it's id
+            '''
+            response = amadeus.booking.flight_order('MlpZVkFMfFdBVFNPTnwyMDE1LTExLTAy').get()
+            print(response.data)
+        except ResponseError as error:
+            raise error
+        
+        #flight order delete
+    def delete(self, request):
+        try:
+            '''
+            # Delete a given flight order based on it's id
+            '''
+            response = amadeus.booking.flight_order('MlpZVkFMfFdBVFNPTnwyMDE1LTExLTAy').delete()
+            print(response.data)
+        except ResponseError as error:
+            raise error
+
+
+# #cheapest date search
+# # Install the Python library from https://pypi.org/project/amadeus
+# from amadeus import Client, ResponseError
+
+# amadeus = Client(
+#     client_id='YOUR_AMADEUS_API_KEY',
+#     client_secret='YOUR_AMADEUS_API_SECRET'
+# )
+
+# try:
+#     '''
+#     Find cheapest dates from Madrid to Munich
+#     '''
+#     response = amadeus.shopping.flight_dates.get(origin='MAD', destination='MUC')
+#     print(response.data)
+# except ResponseError as error:
+#     raise error
 
         
 #takes the selected return of the flightsearch and send the data for booking   
