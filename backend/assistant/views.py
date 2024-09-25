@@ -143,18 +143,14 @@ llm = ChatOpenAI(
 template: str = """/
         You are a personal assistant Chatbot/
         You help users with questions /
-        You will answer {question} based on the {context} you are trained on related to Benson's portfolio, experiences, education, blogs, contacts, skills and projects/
+        You will answer {question} based on the {context} you are trained on /
         If you don't know the answer, you will ask the user to rephrase the question or redirect them to contact bensonkgitau138@gmail.com or 0795216928/
         Always be friendly and helpful/
         Keep the answer short except where more explanation is needed/
-        Useful links:
-        https://www.linkedin.com/in/benson-gitau-b89b6b191/
-        https://github.com/BennyGitau/
         
         At the end of the conversation, that is after a few questions, you will ask the user if they are interested in hiring Benson/
         If they are, contact bensonkgitau138@gmail.com or 0795216928/
         End the conversation with a thank you message and offer more help if needed/
-        you can also provide the useful links/
         """
 
 system_message_prompt = SystemMessagePromptTemplate.from_template(template)
@@ -200,13 +196,15 @@ def generate_response(user_query, retriever):
     return chain.invoke(user_query)
 
 class QueryView(APIView):
-    
     """Django view to handle POST requests for the query."""
 
     def post(self, request, *args, **kwargs):
         serializer = QuerySerializer(data=request.data)
         if serializer.is_valid():
             user_query = serializer.validated_data['query']
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         if not user_query:
             return Response({'error': 'Please enter a valid query.'}, status=status.HTTP_400_BAD_REQUEST)
 

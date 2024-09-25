@@ -1,7 +1,5 @@
 from rest_framework import serializers
 
 class QuerySerializer(serializers.Serializer):
-    query = serializers.CharField()
+    query = serializers.CharField(max_length=500,required=True)
 
-    def create(self, validated_data):
-        query = validated_data.pop('query')

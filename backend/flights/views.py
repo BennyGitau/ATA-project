@@ -57,8 +57,7 @@ class FlightsSearchView(APIView):
             return_flight = serializer.validated_data.get('return_flight') or None
             airlines = serializer.validated_data.get('airlines') or None
             price = serializer.validated_data.get('price') or None
-            
-        
+             
         #validate the required parameters
         # if not origin or not destination or not departure_date or not return_date:
         #     return Response({"error": "Missing required parameters"}, status=status.HTTP_400_BAD_REQUEST)
@@ -97,6 +96,7 @@ class FlightsSearchView(APIView):
         
         #add departure_date to cache key and replace hyphens with underscores
         cache_key = f"flight_search_{originIataCode}_{destinationIataCode}_{return_date}_{travel_class}_{tripPurpose}_{duration}_{one_way}_{return_flight}_{airlines}_{price}"
+        
         cache_timeout = 60 * 60 # 1 hour
 
         cached_response = cache.get(cache_key)
@@ -154,7 +154,7 @@ class FlightAvailabilityView(APIView):
                                                                 departureDate='2022-07-01', adults=1).data
             response_one_flight = amadeus.shopping.flight_offers.pricing.post(
                 flights[0])
-            print(response_one_flight.data)
+            # print(response_one_flight.data)
 
             response_two_flights = amadeus.shopping.flight_offers.pricing.post(
                 flights[0:2])

@@ -1,0 +1,37 @@
+FAQ: Air Traffic Assistant (ATA)
+
+1. What is ATA?
+ATA is an AI-powered travel recommendation web app designed to assist users in finding flights, booking trips, and exploring destinations with personalized suggestions.
+
+2. What features does ATA offer?
+ATA provides personalized travel recommendations, flight search and booking, destination guides, and concierge services. Future features include virtual reality tours, gamification, and social networking.
+
+3. How does ATA personalize recommendations?
+ATA uses AI algorithms, natural language processing, and machine learning to analyze your preferences and provide tailored travel recommendations based on your past searches and interests.
+
+4. Can I book flights directly through ATA?
+Yes, ATA integrates with flight booking systems and allows you to book flights in real-time. You can also view detailed flight offers, including pricing and seat availability.
+
+5. What payment methods are supported?
+ATA supports multiple payment methods, including credit cards, debit cards, and some popular digital payment platforms (exact options depend on the airline).
+
+6. How does ATA retrieve flight information?
+ATA retrieves flight data using the Amadeus API, providing users with accurate, up-to-date flight offers and IATA code information.
+
+7. Can I manage my bookings through ATA?
+Yes, ATA allows users to manage their bookings, check flight statuses, and even modify or cancel bookings according to the airline’s policies.
+
+8. How are the itineraries presented?
+ATA displays itineraries with detailed flight segments, including departure and arrival airports, flight durations, carrier codes, and available amenities.
+
+9. How can I get destination recommendations?
+ATA offers destination guides based on your travel interests, including popular tourist spots, local experiences, and travel tips.
+
+10. Does ATA support multiple travelers?
+Yes, ATA allows booking for multiple travelers. Traveler details such as personal information and travel documents can be entered for each person.
+
+11. Is customer support available?
+Yes, ATA provides customer support via the app to assist with flight bookings, itinerary changes, and other queries.
+
+12. How do I get started?
+Simply search for flights, explore recommendations, and book your preferred options through the app!
