@@ -1,43 +1,85 @@
+import React, { useState } from 'react';
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 import { BiX, BiSend, BiMessageRoundedDetail } from 'react-icons/bi';
-import { useState } from 'react';
 
-const Assistant = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const [conversation, setConversation] = useState([{ sender: "assistant", text: "Hi😊, How can I help you today?" }]);
+function Assistant() {
+  const [messages, setMessages] = useState([]);
+  const [inputText, setInputText] = useState('');
+  const [accessToken, setAccessToken] = useState(null); // Store token
+  const [tokenExpiration, setTokenExpiration] = useState(null); // Store expiration time
+  // const [messages, setMessages] = useState([{ sender: "assistant", text: "Hi😊, How can I help you today?" }]);
   const [loading, setLoading] = useState(false);
-  const apiUrl = import.meta.env.VITE_APP_API_URL;
+  const [isOpen, setIsOpen] = useState(false);
 
-  const toggleChat = () => {
-    setIsOpen(!isOpen);
-  };
+  const projectId = 'airtravelassistance'; // Replace with your Dialogflow Project ID
+  const sessionId = uuidv4(); // A unique session ID
+  const languageCode = 'en'; // Language code
 
-  const handleInputChange = (e) => {
-    setQuery(e.target.value);
-  };
+  async function getAccessToken() {
+     // Check if the token is already available and not expired
+    if (accessToken && tokenExpiration && new Date() < tokenExpiration) {
+      return accessToken;
+    }
+    try {
+      const tokenResponse = await axios.get('http://127.0.0.1:8000/get-google-token/');
+      const newAccessToken = tokenResponse.data.access_token;
+      const expiresIn = tokenResponse.data.expires_in;
+      setAccessToken(newAccessToken);
+      setTokenExpiration(new Date(new Date().getTime() + expiresIn * 1000)); // Add 1 second to account for rounding errors
 
-  const handleSubmit = async (e) => {
+      return newAccessToken;
+    } catch (error) {
+      console.error('Error getting access token', error);
+      return;
+    }
+  }
+
+  const sendMessage = async (e) => {
     e.preventDefault();
-
-    if (!query.trim()) return;
-
-    const newConversation = [...conversation, { sender: "user", text: query }];
-    setConversation(newConversation);
-    setQuery("");
+    const message = inputText;
+    if (!message.trim()) return ;
+    setMessages((prevMessages) => [...prevMessages, { text: message, sender: 'user' }]);
     setLoading(true);
+    setInputText('');
+
+    // Create Dialogflow API request body
+    const data = {
+      queryInput: {
+        text: {
+          text: message,
+          languageCode: languageCode,
+        },
+      },
+    };
+
+    // Get Dialogflow Access Token (replace with your method for obtaining access token)
+    const accessToken = await getAccessToken(); // OAuth2 token or service account token
 
     try {
-      const assistantResponse = await axios.post(`http://127.0.0.1:8000/assistant/`, { query });
-      const response = assistantResponse.data.response;
+      const response = await axios.post(
+        `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      setConversation([...newConversation, { sender: "assistant", text: response }]);
+      const botMessage = response.data.queryResult.fulfillmentText;
+      setMessages((prevMessages) => [...prevMessages, { text: botMessage, sender: 'bot' }]);
     } catch (error) {
-      setConversation([...newConversation, { sender: "assistant", text: "Sorry, something went wrong. Please try again." }]);
+      console.error('Error in Dialogflow request', error);
     } finally {
       setLoading(false);
     }
+
   };
+    const toggleChat = () => {
+    setIsOpen(!isOpen);
+    };
 
   return (
     <div className=" z-50 m-auto">
@@ -57,9 +99,9 @@ const Assistant = () => {
           <h2 className="text-sm font-light mx-2 italic">This is AI powered and may make mistakes.</h2>
           <span className="border-b-2 px-1 border-gray-700 w-[98%] mx-auto block"></span>
           <div className="mb-4 h-72 overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-600 bg-gray-200 p-3 rounded-md">
-            {conversation.map((msg, index) => (
-              <div key={index} className="mb-2 rounded-lg shadow-lg">
-                <div className="text-sm font-semibold p-1 text-gray-600">
+            {messages.map((msg, index) => (
+              <div key={index} className="mb-2 flex rounded-lg shadow-lg">
+                <div className="text-sm text-left font-semibold p-1 text-gray-600">
                   {msg.sender === "user" ? "You:" : "Assistant:"}
                 </div>
                 <div className="p-1">
@@ -86,13 +128,14 @@ const Assistant = () => {
               // <div className="text-gray-600 italic">Assistant is typing...</div>
             )}
           </div>
-          <form onSubmit={handleSubmit} className="p-2 flex flex-row space-x-2">
+          <form onSubmit={(e) => sendMessage(e)} className="p-2 flex flex-row space-x-2">
             <input
               type="text"
               className="w-[85%] border px-2 border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-500"
               placeholder="Ask me anything..."
-              value={query}
-              onChange={handleInputChange}
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
             />
             <button
               type="submit"
@@ -113,6 +156,5 @@ const Assistant = () => {
       )}
     </div>
   );
-};
-
+}
 export default Assistant;
