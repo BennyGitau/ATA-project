@@ -69,13 +69,14 @@ class FlightsSearchView(APIView):
                     keyword=location
                     )
                 if response.data and len(response.data) > 0:
-                    # print(response.data[0]['iataCode'])
+
                     return response.data[0]['iataCode']
             except ResponseError:
                 return Response({"error":"location not found"})
 
         originIataCode = get_location_code(origin)
         destinationIataCode = get_location_code(destination)
+        print(originIataCode, destinationIataCode)
           #save the search query in database before making the request if the search query exists do not save
         if not SearchQuery.objects.filter(origin=origin, destination=destination, departure_date=departure_date, return_date=return_date).exists():
             SearchQuery.objects.create(

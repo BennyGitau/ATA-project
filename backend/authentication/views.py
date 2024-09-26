@@ -107,3 +107,28 @@ class ProfileView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+#google authentication
+# views.py
+
+from django.http import JsonResponse
+from google.oauth2 import service_account
+from google.auth.transport.requests import Request
+import time
+
+class GetAccessToken(APIView):
+  def get(self, request):
+    # Load the service account key
+    credentials = service_account.Credentials.from_service_account_file(
+        'airtravelassistance-561a34090111.json',
+        scopes=['https://www.googleapis.com/auth/cloud-platform']
+    )
+
+    credentials.refresh(Request())
+    access_token = credentials.token
+    expiry_timestamp = credentials.expiry.timestamp()
+    current_timestamp = time.time()
+
+    return JsonResponse({
+        'access_token': access_token,
+        'expires_in': expiry_timestamp - current_timestamp,  
+        })

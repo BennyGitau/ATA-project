@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "airtravelassistance",
+  "private_key_id": "561a34090111f50f57b2584c3c9ce6330b0f2f46",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDj5NQpk8Y12wH3\nQcvwipFICE/OkOr7DIhWqD6EXXYiDOgHjfd4a2jypdBvTY6vc07y0kr4g+LWHadD\nNSv2LQRdUCpW1CDR8XfHMOLxhWphqV8o04CHgeCXckE0O31gT8RUqlqmv4vKAB2j\nPi4eZPnShGUPDMhTVdV33fO5M402WR2A3htU6tyHpzUhRYCrugOnip19qGYWIoA4\nL+XCV1ToWX7hW/tq9BfjXspThdh4m9phhq/q7yyGV2ckxJFwnzYWZHqLv+ihrERO\n+L3wIjE2zoW+ZcLxxhdAqQQrgk/RAwetG+XNEyLjAUB0Xu1VVcnmPuItIx9DrA3T\nDlndfr2NAgMBAAECggEAGshLvs8lHjMs2fgblZtTU5nWdzpEw1hHtZd0MW4icgH+\nStT+XmKRJOMjydDdkfUFNDhOo0IsqGk3vQhEsFu+BZFkSGwJp2KvZvNx2FyLkgqr\nqkqg8kvrLyE4VIEhTO5S7nhOywX70bONyB+In/3R9lGk5s3jxRdzTPECsaNDVz2N\nF/mvXg8zLRjQDffpOvyArHSfn5MKBou5aR+h2DLnUTFqn4imr5USbwR+Zf/UMPr1\noc5d4NMAfzCrFFYHrtjiIOysAVzr3jSjG2dlLXJtnGOr9ewqYSURmGkC8yp6toDl\n3rATSjmJkMNf4W1LTeZUGfxOYmmTZFhIYsYZ4kcCqQKBgQD13OzA0m+kR47Q2cQU\n7yzbHtXqn0Ig0fJalSMHc4205VFBgvaEH0glaHnaC2dG9WZVas/xN+eOWmMBIquc\nW8dK4F0tKER1RyUHPgBXyyHEn0RkaNMQEg/DBT3pOlCCq7anTonOuoodAIb8j8jt\n+NLE3Gh4sjnkW7Y1HzRgpDVQ1wKBgQDtSj2OorQVExdbNmwbzWD2gxQn7USlmq6W\nFicHITn8aR2EqokoDFPunxfP9TdKjjSzicJjhVTRwDl1VLDJ17uiSwInGN12Tr7E\n4Dn94b2lmfThIbemRC0Y896phx4P2uyjZCgPrv4pPXPLrV8hW4bgETPuiqrQvwWT\nu0fWPqREOwKBgQDhd0wWN+Txvj2WAV3z5LI577k0g//coSujLgkFmE5nibROY481\n8ony5DB6aOK5C+pggqdXCnFq9jC8pdLCfNfyLnbEJp1A/5FRZuZhnILHEVdizU5g\n+m9B5Ni1vSh/7ICARWHTFvX5SrZ/fkxBD2IZ7hZQOQEmDYS2ins59Nx/2QKBgEOy\nP3eW8Xtls+8gypzv7e7GHJT7eu8n/xDwhvfgwdNCBdrYcELNqZBVMQzyL3EEuwJR\nlfSgkD868OmJXNpowq4daiLPVDcxZfly4viMU3eQQa2M2gEESD1rLaX911S8p3BB\n3bADw5zuXD/KWW6B1yvLnJ48T1k4dhXcgzUbL/ALAoGAIm8bmETnpa5hlR3UW8+l\n+dTMtkU1Hq91k+6kr5YhtBSZddoQ2fwSjPqyo49FyWwc4IBrYMnUsb6qT/xqXwjE\n+G5BZu69UkMDE9KmDNLDq0P3hpQPc/vwXjJcOLfOLZtXyq7c3QWTMmpUhwpfWCxp\nfx27LLpXgBD5IGvzNFMK1i4=\n-----END PRIVATE KEY-----\n",
+  "client_email": "ata-838@airtravelassistance.iam.gserviceaccount.com",
+  "client_id": "108011806935918387536",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/ata-838%40airtravelassistance.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
