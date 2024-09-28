@@ -33,7 +33,7 @@ class DocumentSerializer(serializers.Serializer):
     birthPlace = serializers.CharField()
     issuanceLocation = serializers.CharField()
     issuanceDate = serializers.DateField()
-    number = serializers.CharField()
+    docNumber = serializers.CharField()
     expiryDate = serializers.DateField()
     issuanceCountry = serializers.CharField()
     validityCountry = serializers.CharField()
@@ -50,18 +50,25 @@ class TravelerSerializer(serializers.Serializer):
 
 class FlightBookingSerializer(serializers.Serializer):
     flightOfferId = serializers.CharField()
+    cache_key = serializers.CharField()
     traveler = TravelerSerializer(many=True)
     def create(self, validated_data):
         # Handle how you create a flight booking instance from validated data
         # Extract nested data
-        name_data = validated_data.pop('name')
-        contact_data = validated_data.pop('contact')
-        documents_data = validated_data.pop('documents')
+        travelers_data = validated_data.pop('traveler')
+
+        traveler_list= []
+
+        for traveler in travelers_data:
+
+            name_data = traveler.pop('name')
+            contact_data = traveler.pop('contact')
+            documents_data = traveler.pop('documents')
 
         # You can manipulate the data or pass it on to an external service (e.g., Amadeus API)
         traveler_data = {
-            'id': validated_data['id'],
-            'dateOfBirth': validated_data['dateOfBirth'],
+            'id': traveler['id'],
+            'dateOfBirth': traveler['dateOfBirth'],
             'name': {
                 'firstName': name_data['firstName'],
                 'lastName': name_data['lastName']
@@ -73,10 +80,9 @@ class FlightBookingSerializer(serializers.Serializer):
             },
             'documents': documents_data
         }
+        traveler_list.append(traveler_data)
 
-        # If you're calling an external service, you can do so here
-        # Example: return traveler data for the booking API
-        return traveler_data
+        return traveler_list
 
     def update(self, instance, validated_data):
         # Handle how you update an existing flight booking instance

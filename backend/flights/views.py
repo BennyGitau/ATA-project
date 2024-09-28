@@ -28,7 +28,6 @@ amadeus = Client(
     client_secret=AMADEUS_API_SECRET
     )
 
-flight_search_results = {} 
 class FlightsSearchView(APIView):
 
     @swagger_auto_schema(
@@ -76,7 +75,24 @@ class FlightsSearchView(APIView):
 
         originIataCode = get_location_code(origin)
         destinationIataCode = get_location_code(destination)
+        if not originIataCode:
+            return Response({"error":"Invalid origin"}, status=status.HTTP_404_NOT_FOUND)
+        if not destinationIataCode:
+            return Response({"error":"Invalid destination"}, status=status.HTTP_404_NOT_FOUND)
+        
         print(originIataCode, destinationIataCode)
+
+          #add departure_date to cache key and replace hyphens with underscores
+        cache_key = f"flight_search_{originIataCode}_{destinationIataCode}_{return_date}_{travel_class}_{tripPurpose}_{duration}_{one_way}_{return_flight}_{airlines}_{price}"
+        
+        cache_timeout = 60 * 60 # 1 hour
+
+        cached_response = cache.get(cache_key)
+        if cached_response:
+            return Response({
+                'flights':cached_response,
+                'cache_key': cache_key
+                }, status=status.HTTP_200_OK)
           #save the search query in database before making the request if the search query exists do not save
         if not SearchQuery.objects.filter(origin=origin, destination=destination, departure_date=departure_date, return_date=return_date).exists():
             SearchQuery.objects.create(
@@ -95,14 +111,6 @@ class FlightsSearchView(APIView):
                 price=price
             )
         
-        #add departure_date to cache key and replace hyphens with underscores
-        cache_key = f"flight_search_{originIataCode}_{destinationIataCode}_{return_date}_{travel_class}_{tripPurpose}_{duration}_{one_way}_{return_flight}_{airlines}_{price}"
-        
-        cache_timeout = 60 * 60 # 1 hour
-
-        cached_response = cache.get(cache_key)
-        if cached_response:
-            return Response(cached_response, status=status.HTTP_200_OK)
 
         #get the flight search data from amadeus
         try:
@@ -123,12 +131,15 @@ class FlightsSearchView(APIView):
                 )
             response_data = response.data
             if response_data:
-                flight_search_results=response_data
                 cache.set(cache_key, response_data, cache_timeout)
-                print(flight_search_results)
-                return Response(response_data, status=status.HTTP_200_OK)
+                return Response({
+                    'flights':response_data,
+                    'cache_key': cache_key
+                    }, status=status.HTTP_200_OK)
             #save the cache
         except ResponseError as error:
+            # Cache the miss with shorter timeout to prevent hammering the API
+            cache.set(cache_key, {"error": str(error)}, cache_timeout // 2)
             return Response({"error": str(error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
  #flight offers search
@@ -149,7 +160,7 @@ class FlightAvailabilityView(APIView):
         
         try:
             '''
-            Confirm availability and price from SYD to BKK in summer 2022
+            Confirm availability and price from SYD to BKK in summer 2022 //add the flight offer from f/
             '''
             flights = amadeus.shopping.flight_offers_search.get(originLocationCode='SYD', destinationLocationCode='BKK',
                                                                 departureDate='2022-07-01', adults=1).data
@@ -232,11 +243,18 @@ class FlightBookingView(APIView):
             },
     )
     def post(self, request):
+        booking_data = request.data
+
         serializer = FlightBookingSerializer(data=request.data)
 
         if serializer.is_valid():
             travelers_data = serializer.create(serializer.validated_data)
             flightOfferId = serializer.validated_data.get('flightOfferId')
+            cache_key = serializer.validated_data.get('cache_key')
+
+        flight_search_results = cache.get(cache_key)
+        if not flight_search_results:
+            return Response({"error": "Flight not found"}, status=status.HTTP_404_NOT_FOUND)
 
         flight_to_book = flight_search_results.get(flightOfferId)
         if not flight_to_book:
@@ -246,14 +264,17 @@ class FlightBookingView(APIView):
             # Flight Offers Price to confirm the price of the chosen flight
             price_confirm = amadeus.shopping.flight_offers.pricing.post(
                 flight_to_book)
+            
+            #add error handling
 
             # Flight Create Orders to book the flight
             book_flight = amadeus.booking.flight_orders.post(
-                flight_to_book, travelers_data)
+                price_confirm.data, travelers_data)
 
             response_data = book_flight.data
             #before saving the booking data comfirm if booking is successful
-            if response_data  and len(response_data) > 0:
+            if response_data.data.get('status') == 'SUCCESS'  and len(response_data) > 0:
+                    #change to get the data from response after booking....
                     booked_flight = Booking.objects.create(
                     flight_id=flight_to_book.get('id'),
                     origin=flight_to_book.get('departure'),
@@ -273,8 +294,10 @@ class FlightBookingView(APIView):
                     payment_status=flight_to_book.get('paymentStatus') or None,
                     # booking_data=booking_data  # Save booking data if needed
                 )
-
-            return Response({"message": "Flight booked successfully", "data": response_data})
+                    return Response({"message": "Flight booked successfully", "data": response_data})
+            else:
+                return Response({"error": "Flight booking failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
             # return Response({'message': 'Flight booked successfully', 'booked_flight': FlightSearchSerializer(booked_flight).data})
 
         except ResponseError as error:
