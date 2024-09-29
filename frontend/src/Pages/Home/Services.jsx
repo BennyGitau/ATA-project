@@ -45,7 +45,8 @@ function Services() {
                         <button onClick={handleClick} className='text-3xl text-yellow-600 bg-black p-2 rounded-md'>
                             First Class Flights
                         </button>
-                            <p className='text-left text-white w-fit'>
+                        <span className='border border-l-2 border-white'></span>
+                        <p className='text-left text-white w-fit'>
                             Escape to any corner of Kenya on your own terms. 
                             Our extensive network connects you with a multitude of reputable Private Charter Operators,
                             each boasting a diverse fleet and the ability to curate a bespoke travel experience tailored to your exact desires.
