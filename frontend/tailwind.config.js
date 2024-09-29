@@ -4,7 +4,13 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}", // Adjust to your project structure
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        poppins: ['Poppins', 'sans-serif'],
+        garamond: ['EB Garamond', 'serif'],
+      }
+    },
+    
   },
   plugins: [],
 }
