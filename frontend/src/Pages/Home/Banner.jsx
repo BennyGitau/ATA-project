@@ -16,7 +16,7 @@ function Banner() {
     }, []);
 
     const bannerStyle = {
-        height: scrollY < 400 ? `${950 - scrollY}px` : `100px`,
+        height: scrollY < 400 ? `${600 - scrollY}px` : `100px`,
     };
 
     const contentStyle = {

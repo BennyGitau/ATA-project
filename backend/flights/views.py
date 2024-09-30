@@ -45,11 +45,14 @@ class FlightsSearchView(APIView):
         
         if serializer.is_valid():
             # Extract the validated data
-            origin = serializer.validated_data.get('origin')
-            destination = serializer.validated_data.get('destination')
-            departure_date = serializer.validated_data.get('departure_date')
-            return_date = serializer.validated_data.get('return_date') or None
-            travel_class = serializer.validated_data.get('travel_class') or None
+            origin = serializer.validated_data.get('origin') #originLocationCode required
+            destination = serializer.validated_data.get('destination') #destinationLocationCode required
+            departure_date = serializer.validated_data.get('departure_date') #departureDate required
+            return_date = serializer.validated_data.get('return_date') or None #returnDate
+            adults = serializer.validated_data.get('adults') #ok required
+            children = serializer.validated_data.get('children') or None
+            infants = serializer.validated_data.get('infants') or None
+            travel_class = serializer.validated_data.get('travel_class') or None #travelClass         
             tripPurpose = serializer.validated_data.get('tripPurpose') or None
             duration = serializer.validated_data.get('duration') or None
             one_way = serializer.validated_data.get('one_way') or None
@@ -276,24 +279,25 @@ class FlightBookingView(APIView):
             if response_data.data.get('status') == 'SUCCESS'  and len(response_data) > 0:
                     #change to get the data from response after booking....
                     booked_flight = Booking.objects.create(
-                    flight_id=flight_to_book.get('id'),
-                    origin=flight_to_book.get('departure'),
-                    destination=flight_to_book.get('arrival'),
-                    departure_date=flight_to_book.get('departureDate') or None,
-                    return_date=flight_to_book.get('returnDate') or None,
-                    price=flight_to_book.get('price') or None,
-                    travel_class=flight_to_book.get('cabin') or None,
-                    airline=flight_to_book.get('airline') or None,
-                    duration=flight_to_book.get('duration') or None,
-                    one_way=flight_to_book.get('oneWay') or None,
-                    return_flight=flight_to_book.get('returnFlight') or None,
-                    seats=flight_to_book.get('seats') or None,
-                    num_tickets=flight_to_book.get('numTickets') or None,
-                    passenger_names=flight_to_book.get('passengerNames') or None,
-                    contact_email=flight_to_book.get('contactEmail') or None,
-                    payment_status=flight_to_book.get('paymentStatus') or None,
-                    # booking_data=booking_data  # Save booking data if needed
+                    flight_id=response_data.get('id'),
+                    origin=response_data.get('departure'),
+                    destination=response_data.get('arrival'),
+                    departure_date=response_data.get('departureDate'),
+                    return_date=response_data.get('returnDate'),
+                    price=response_data.get('price'),
+                    travel_class=response_data.get('cabin'),
+                    airline=response_data.get('airline'),
+                    duration=response_data.get('duration'),
+                    one_way=response_data.get('oneWay'),
+                    return_flight=response_data.get('returnFlight'),
+                    seats=response_data.get('seats'),
+                    num_tickets=response_data.get('numTickets'),
+                    passenger_names=response_data.get('passengerNames'),
+                    contact_email=response_data.get('contactEmail'),
+                    payment_status=response_data.get('paymentStatus'),
+                    #booking_data=booking_data  # Save booking data if needed
                 )
+                    cache.delete(cache_key)
                     return Response({"message": "Flight booked successfully", "data": response_data})
             else:
                 return Response({"error": "Flight booking failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

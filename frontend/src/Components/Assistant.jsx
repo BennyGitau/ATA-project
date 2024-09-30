@@ -82,7 +82,7 @@ function Assistant() {
     };
 
   return (
-    <div className=" z-50 m-auto">
+    <div className="fixed bottom-10 right-5 z-50 m-auto">
       {isOpen && (
         <div className="w-80 md:w-[400px] bg-gray-200 opacity-100 text-black shadow-lg rounded-lg">
           <div className="flex justify-between items-center p-2">
@@ -102,7 +102,7 @@ function Assistant() {
             {messages.map((msg, index) => (
               <div key={index} className="mb-2 flex rounded-lg shadow-lg">
                 <div className="text-sm text-left font-semibold p-1 text-gray-600">
-                  {msg.sender === "user" ? "You:" : "Assistant:"}
+                  {msg.sender === "user" ? "You:" : "ATA:"}
                 </div>
                 <div className="p-1">
                   {msg.text}

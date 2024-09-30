@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -16,7 +17,9 @@ function Header() {
 
     return (
         <header className={`fixed top-0 left-0 w-full transition-all duration-300 ${isScrolled ? 'bg-black shadow-md' : 'bg-transparent'} z-50 p-4`}>
-            <h1 className="text-3xl text-white">My Header</h1>
+            <Link to='/'>
+                <h1 className="text-3xl text-white">ATA</h1>
+            </Link>
         </header>
     );
 }
