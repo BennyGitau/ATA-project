@@ -46,8 +46,6 @@ INSTALLED_APPS = [
     'payments',
     'reviews',
     'itinerary',
-    'destinations',
-    'authentication',
     'corsheaders',
     'assistant',
 ]
@@ -98,7 +96,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'db.test',
     }
 }
 
@@ -177,7 +175,19 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default backend
+    'users.backends.EmailBackend',  # Custom email backend if needed
+]
 
 import os
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bensonkamaugitau@gmail.com'
+EMAIL_HOST_PASSWORD = 'buzg acxq oylx fsqv'  # Use App Passwords if 2FA is enabled
+
