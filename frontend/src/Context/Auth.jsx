@@ -12,6 +12,7 @@ export const UserProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [registerMessage, setRegisterMessage] = useState('');
     const [passwordResetMessage, setPasswordResetMessage] = useState('');
+    const [loginMessage, setLoginMessage] = useState('');
 
     const handleRegister = async (data) => {
         try {
@@ -42,11 +43,13 @@ export const UserProvider = ({ children }) => {
                 toast.success('Login successful!', {theme: "colored", autoClose: 3000});
                 console.log(response.data);
             } else {
-                toast.error(response.data.error, {theme: "colored", autoClose: 3000});
                 setLoading(false);
+                console.log(response.data.error);
             }
         } catch (error) {
             console.error('Error logging in:',error);
+            setLoginMessage(error.response.data.error);
+            console.log(loginMessage);
             setLoading(false);
         }
     }
@@ -65,7 +68,7 @@ export const UserProvider = ({ children }) => {
     
     const handleLogout = async () => {
         try {
-            const response = await axios.post('http://127.0.0.1:8000/logout/');
+            const response = await axios.post('http://127.0.0.1:8000/api/logout/');
             setUser(null);
             setLoading(false);
         } catch (error) {
@@ -76,7 +79,7 @@ export const UserProvider = ({ children }) => {
 
     const deleteAccount = async () => {
         try {
-            const response = await axios.delete('http://127.0.0.1:8000/delete_account/');
+            const response = await axios.delete('http://127.0.0.1:8000/api/delete_account/');
             setUser(null);
             setLoading(false);
         } catch (error) {
@@ -87,7 +90,7 @@ export const UserProvider = ({ children }) => {
 
     const updateProfile = async (data) => {
         try {
-            const response = await axios.put('http://127.0.0.1:8000/update_profile/', data);
+            const response = await axios.put('http://127.0.0.1:8000/api/profile/', data);
             setUser(response.data);
             setLoading(false);
         } catch (error) {
@@ -98,10 +101,22 @@ export const UserProvider = ({ children }) => {
     
     const getProfile = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:8000/get-user/');
+            const response = await axios.get('http://127.0.0.1:8000/api/profile/');
             setUser(response.data);
             setLoading(false);
         } catch (error) {
+            console.error(error);
+            setLoading(false);
+        }
+    }
+    const [passwordChangeMsg, setPasswordChangeMsg] = useState('');
+    const updatePassword = async (data) => {
+        try {
+            const response = await axios.patch('http://127.0.0.1:8000/api/profile/', data);
+            setPasswordChangeMsg(response.data.message);
+            setLoading(false);
+        } catch (error) {
+            setPasswordChangeMsg(error.response.data.error);
             console.error(error);
             setLoading(false);
         }
@@ -116,6 +131,9 @@ export const UserProvider = ({ children }) => {
             loading,
             registerMessage,
             passwordResetMessage,
+            loginMessage,
+            passwordChangeMsg,
+            updatePassword,
             passwordReset,
             handleRegister,
             handleLogin,

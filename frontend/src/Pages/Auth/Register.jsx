@@ -44,6 +44,10 @@ function Register() {
         setError('Please fill in all fields.');
         return;
       }
+      if (formData.password.length < 8) {
+        setError('Password must be at least 8 characters long.');
+        return;
+      }
     }
 
     // Call the registration function
@@ -57,7 +61,7 @@ function Register() {
       email: '',
       password: '',
       password_confirm: '',
-      organization_name: '',
+      company_name: '',
     });
   };
 
@@ -141,7 +145,7 @@ function Register() {
               <input
                 type="text"
                 name="company_name"
-                value={formData.organization_name}
+                value={formData.company_name}
                 onChange={handleChange}
                 placeholder="Company Name"
                 className="w-full p-2 border border-gray-300 rounded"

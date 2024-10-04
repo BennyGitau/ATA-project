@@ -7,7 +7,7 @@ const Login = () => {
         email: "", 
         password: "" 
     });
-    const { handleLogin } = userAuth();
+    const { handleLogin, loginMessage } = userAuth();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -21,6 +21,7 @@ const Login = () => {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="bg-white shadow-md rounded-lg p-8 w-96">
+                {loginMessage && <p className="text-red-500 text-center mb-4">{loginMessage}</p>}
                 <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
