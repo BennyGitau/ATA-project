@@ -14,8 +14,9 @@ class User(AbstractUser):
     ]
     
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    username= None
-    email_verified = models.BooleanField(default=False, unique=True)
+    username=models.CharField(max_length=255, default='')
+    email = models.EmailField(unique=True)
+    email_verified = models.BooleanField(default=False)
     first_name = models.CharField(max_length=255, null=True, blank=True)
     last_name = models.CharField(max_length=255, null=True, blank=True)
     organization_name = models.CharField(max_length=255, null=True, blank=True)
@@ -23,6 +24,7 @@ class User(AbstractUser):
     address = models.CharField(max_length=255, null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     profile_pic = models.ImageField(upload_to='profile_pics', null=True, blank=True)
+   
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -49,3 +51,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+    
+    # def set_password(self, raw_password: str | None) -> None:
+    #     return super().set_password(raw_password)

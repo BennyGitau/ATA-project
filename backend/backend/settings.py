@@ -190,4 +190,30 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'bensonkamaugitau@gmail.com'
 EMAIL_HOST_PASSWORD = 'buzg acxq oylx fsqv'  # Use App Passwords if 2FA is enabled
+DEFAULT_FROM_EMAIL='bensonkamaugitau@gmail.com' #update to use a no reply email
+# SERVER_EMAIL = 'no-reply@yourdomain.com'
 
+
+
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        },
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',  # Common password validation
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+
+# 5 minutes = 5 * 60 seconds
+PASSWORD_RESET_TIMEOUT = 300  # Time in seconds

@@ -8,12 +8,12 @@ class CustomUserAdmin(UserAdmin):
     list_display = ('email', 'first_name', 'last_name', 'role', 'is_active', 'is_staff')
     list_filter = ('is_active', 'is_staff', 'role')
     ordering = ('email',)
-    search_fields = ('email', 'first_name', 'last_name')
+    search_fields = ('email', 'first_name', 'last_name', 'username')
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('role', 'organization_name', 'bio', 'profile_pic', 'phone_number', 'address', 'email_verified',)}),
+        (None, {'fields': ('role', 'organization_name', 'bio', 'profile_pic', 'phone_number', 'address', 'email_verified', 'created_at',)}),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
-        (None, {'fields': ('role', 'organization_name', 'bio', 'profile_pic', 'phone_number', 'address', 'email_verified',)}),
+        (None, {'fields': ('role', 'organization_name', 'bio', 'profile_pic', 'phone_number', 'address', 'email_verified', 'created_at',)}),
     )
 
 # Register the custom user model with the admin
