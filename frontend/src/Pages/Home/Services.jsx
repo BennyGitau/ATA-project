@@ -7,7 +7,7 @@ import FlightImg from '../../assets/Home/flightQuote.jpg';
 import TourImg from '../../assets/Home/tour.jpg';
 import Aitbnbs from '../../assets/Home/hotels.jpg';
 import CarImg from '../../assets/Home/cars.jpg';
-
+// import CarImg from '../../assets/Home/cars.jpg';
 function Services() {
   const [charter, setCharter] = useState(false);
   const [flight, setFlight] = useState(false);
