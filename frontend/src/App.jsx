@@ -12,6 +12,7 @@ import EngageUs from './Pages/EngageUs';
 import OurBlog from './Pages/OurBlog';
 import MagicalKenya from './Pages/MagicalKenya';
 import TravelAccessories from './Pages/TravelAccessories';
+import Profile from './Pages/Profile';
 
 
 
@@ -26,11 +27,12 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset_password" element={<PasswordReset />} />
-          <Route path="/aboutUs" element={<AboutUs />} />
-          <Route path="/engageUs" element={<EngageUs />} />
-          <Route path="/ourBlog" element={<OurBlog />} />
-          <Route path="/magicalKenya" element={<MagicalKenya />} />
-          <Route path="/travelAccessories" element={<TravelAccessories />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/engage" element={<EngageUs />} />
+          <Route path="/blog" element={<OurBlog />} />
+          <Route path="/magical-kenya" element={<MagicalKenya />} />
+          <Route path="/accessories" element={<TravelAccessories />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Routes>
     </Router>
