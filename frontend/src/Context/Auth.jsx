@@ -13,6 +13,7 @@ export const UserProvider = ({ children }) => {
     const [registerMessage, setRegisterMessage] = useState('');
     const [passwordResetMessage, setPasswordResetMessage] = useState('');
     const [loginMessage, setLoginMessage] = useState('');
+    const [isLoggedIn, setIsLoggedIn] = useState(true);
 
     const handleRegister = async (data) => {
         try {
@@ -38,6 +39,7 @@ export const UserProvider = ({ children }) => {
             if(response.status === 200) {
                 setUser(response.data.user);
                 setLoading(false);
+                // setIsLoggedIn(true);
                 localStorage.setItem('authToken', response.data.token);
                 localStorage.setItem('refreshToken', response.data.refresh);
                 toast.success('Login successful!', {theme: "colored", autoClose: 3000});
@@ -133,6 +135,7 @@ export const UserProvider = ({ children }) => {
             passwordResetMessage,
             loginMessage,
             passwordChangeMsg,
+            isLoggedIn,
             updatePassword,
             passwordReset,
             handleRegister,

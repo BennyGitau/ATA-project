@@ -7,6 +7,13 @@ import Layout from './Components/Layout/Layout';
 import Register from './Pages/Auth/Register';
 import Login from './Pages/Auth/Login';
 import PasswordReset from './Pages/Auth/Reset_password';
+import AboutUs from './Pages/AboutUs';
+import EngageUs from './Pages/EngageUs';
+import OurBlog from './Pages/OurBlog';
+import MagicalKenya from './Pages/MagicalKenya';
+import TravelAccessories from './Pages/TravelAccessories';
+
+
 
 function App() {
 
@@ -19,6 +26,11 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset_password" element={<PasswordReset />} />
+          <Route path="/aboutUs" element={<AboutUs />} />
+          <Route path="/engageUs" element={<EngageUs />} />
+          <Route path="/ourBlog" element={<OurBlog />} />
+          <Route path="/magicalKenya" element={<MagicalKenya />} />
+          <Route path="/travelAccessories" element={<TravelAccessories />} />
         </Route>
       </Routes>
     </Router>
