@@ -45,38 +45,62 @@ function Assistant() {
 
     // Create Dialogflow API request body
     const data = {
-      queryInput: {
-        text: {
-          text: message,
-          languageCode: languageCode,
-        },
-      },
+    project_id: projectId,
+    session_id: sessionId,
+    language_code: languageCode,
+    knowledge_base_id: 'Mjk5ODAxNTU0MDU5MDU0Mjg0OQ', // Replace with your Knowledge Base ID
+    texts: [message]
     };
+    // const data = {
+    //   queryInput: {
+    //     text: {
+    //       text: message,
+    //       languageCode: languageCode,
+    //     },
+    //   },
+    // };
 
     // Get Dialogflow Access Token (replace with your method for obtaining access token)
     const accessToken = await getAccessToken(); // OAuth2 token or service account token
 
-    try {
-      const response = await axios.post(
-        `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/detect_intent_knowledge/', data);
+    const botMessages = response.data;
 
-      const botMessage = response.data.queryResult.fulfillmentText;
-      setMessages((prevMessages) => [...prevMessages, { text: botMessage, sender: 'bot' }]);
-    } catch (error) {
-      console.error('Error in Dialogflow request', error);
-    } finally {
-      setLoading(false);
-    }
+    botMessages.forEach((botMessage) => {
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { text: botMessage.fulfillment_text, sender: 'bot' }
+      ]);
+    });
+  } catch (error) {
+    console.error('Error in Dialogflow request', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  };
+  //   try {
+  //     const response = await axios.post(
+  //       `https://dialogflow.googleapis.com/v2/projects/${projectId}/agent/sessions/${sessionId}:detectIntent`,
+  //       data,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken}`,
+  //           'Content-Type': 'application/json',
+  //         },
+  //       }
+  //     );
+
+  //     const botMessage = response.data.queryResult.fulfillmentText;
+  //     setMessages((prevMessages) => [...prevMessages, { text: botMessage, sender: 'bot' }]);
+  //   } catch (error) {
+  //     console.error('Error in Dialogflow request', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+
+  // };
     const toggleChat = () => {
     setIsOpen(!isOpen);
     };
@@ -84,21 +108,21 @@ function Assistant() {
   return (
     <div className="fixed bottom-10 right-5 z-50 m-auto">
       {isOpen && (
-        <div className="w-80 md:w-[400px] bg-gray-200 opacity-100 text-black shadow-lg rounded-lg">
+        <div className="w-80 md:w-[450px] bg-gray-200 opacity-100 text-black shadow-lg rounded-lg">
           <div className="flex justify-between items-center p-2">
-            <div className="flex items-center">
-              <h2 className="text-lg font-semibold text-gray-800">Personal Assistant</h2>
+            <div className="flex items-center justify-center w-full ">
+              <h2 className="text-lg font-semibold text-gray-800 text-center">ASK ATA:😊 </h2>
             </div>
             <button
               onClick={toggleChat}
-              className="text-gray-500 text-3xl hover:text-gray-700"
+              className="text-gray-500 text-3xl px-2 hover:text-gray-700"
             >
               <BiX />
             </button>
           </div>
-          <h2 className="text-sm font-light mx-2 italic">This is AI powered and may make mistakes.</h2>
+          {/* <h2 className="text-sm font-light mx-2 italic">This is AI powered and may make mistakes.</h2> */}
           <span className="border-b-2 px-1 border-gray-700 w-[98%] mx-auto block"></span>
-          <div className="mb-4 h-72 overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-600 bg-gray-200 p-3 rounded-md">
+          <div className="mb-4 h-96 overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-600 bg-gray-200 p-3 rounded-md">
             {messages.map((msg, index) => (
               <div key={index} className="mb-2 flex rounded-lg shadow-lg">
                 <div className="text-sm text-left font-semibold p-1 text-gray-600">

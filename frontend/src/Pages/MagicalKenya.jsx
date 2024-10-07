@@ -1,16 +1,8 @@
-// import React from 'react'
-
-// function MagicalKenya() {
-//   return (
-//     <div>MagicalKenya</div>
-//   )
-// }
-
-// export default MagicalKenya
 
 import React, { useState } from 'react';
 import Outdoor from '../assets/Home/outdoor.jpg';
 import Girrafe from '../assets/Home/girraffe.jpg';
+import Layout from '../Components/Layout/Layout';
 
 const categories = [
   {
@@ -74,6 +66,7 @@ const MagicalKenya = () => {
   };
 
   return (
+    <Layout>
     <div className="min-h-screen bg-gray-100 font-sans">
       {/* Table of Contents */}
       <div className="h-96 shadow-md py-6 bg-cover bg-center relative" style={{ backgroundImage: `url(${Girrafe})` }}>
@@ -81,10 +74,10 @@ const MagicalKenya = () => {
           <h1 className="text-white text-4xl font-bold relative z-50">
             Magical Kenya
             {/* Shadow effect for "Gallery" */}
-            <span className="absolute left-0 w-full  text-center text-gold-primary text-9xl font-semibold opacity-50 z-0">
+          </h1>
+            <span className="absolute left-0  w-full  text-center text-gold-primary text-9xl font-semibold opacity-50 z-0">
               Gallery
             </span>
-          </h1>
         </div>
       </div>
       <div className='w-[90%] mx-auto my-6 text-center text-xl font-poppins text-gray-700 '>
@@ -139,6 +132,7 @@ const MagicalKenya = () => {
         ))}
       </div>
     </div>
+    </Layout>
   );
 };
 

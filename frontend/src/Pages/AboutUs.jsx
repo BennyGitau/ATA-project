@@ -11,6 +11,7 @@ import { BiLike } from "react-icons/bi";
 import { FaMessage } from "react-icons/fa6";
 import { IoIosShareAlt } from "react-icons/io";
 import { FaEllipsisV } from 'react-icons/fa';
+import Layout from '../Components/Layout/Layout';
 
 function AboutUs() {
   const [open, setOpen] = useState(false);
@@ -20,6 +21,7 @@ function AboutUs() {
   }
 
   return (
+    <Layout>
     <div className="font-garamond">
       {/* banner */}
       <section
@@ -152,6 +154,7 @@ function AboutUs() {
         </div>
       </section>
     </div>
+    </Layout>
   );
 }
 

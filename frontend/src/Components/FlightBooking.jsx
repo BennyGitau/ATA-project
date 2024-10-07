@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import FlightList from '../Components/FlightOffer';
+import FlightList from './FlightOffer';
+import Layout from './Layout/Layout';
+import { userAuth } from '../Context/Auth';
 
 const FlightBooking = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +19,8 @@ const FlightBooking = () => {
     price: ''
   });
 
+  const { flights, searchFlights } = userAuth();
+  console.log(flights);
   const [responseMessage, setResponseMessage] = useState('');
   const [isDropdownOpenCabin, setIsDropdownOpenCabin] = useState(false);
   const [isDropdownOpenTravelers, setIsDropdownOpenTravelers] = useState(false);
@@ -55,23 +59,18 @@ const FlightBooking = () => {
       [name]: type === 'checkbox' ? checked : value
     });
 
-    console.log(formData);
   };
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post('http://localhost:8000/flights/', formData);
-      setResponseMessage(response.data.flights);
-    } catch (error) {
-      setResponseMessage('Error: ' + error.message);
-    }
+    searchFlights(formData);
   };
 
   return (
-    <div className="w-full mx-auto h-screen my-10 p-6 shadow-md ">
-      <h2 className="text-2xl font-bold mb-6">Flight Search</h2>
-      <form className="w-[70%] mx-auto h-fit bg-[#031940] p-4 flex flex-col space-y-2 rounded-md" onSubmit={handleSubmit}>
+    <div className="w-full mx-auto pt-20 shadow-md">
+      <div className='mt-10 rounded-md w-[70%] bg-[#031940a4] opacity-90 pb-3 mx-auto'>
+      <h2 className="text-2xl  text-center pt-1 text-white font-bold ">Flight Search</h2>
+      <form className="mx-auto h-fit  p-4 flex flex-col space-y-2 " onSubmit={handleSubmit}>
       {/* Flight Type Selection */}
       <div className="flex items-center justify-between">
         <div className="flex ml-10 space-x-6">
@@ -274,16 +273,8 @@ const FlightBooking = () => {
         </button>
       </div>
       </div>
-
     </form>
-      {responseMessage && (
-        <div className="mt-6 p-4 bg-gray-100 rounded-md shadow">
-            <div className="bg-gray-100 min-h-screen py-10">
-            <h1 className="text-3xl font-bold text-center text-gray-800 mb-10">Flight Search Results</h1>
-            <FlightList flights={responseMessage} />
-            </div>
-        </div>
-      )}
+    </div>
     </div>
   );
 };

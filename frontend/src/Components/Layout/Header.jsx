@@ -3,6 +3,16 @@ import { Link } from 'react-router-dom';
 import { FaBars, FaTimes, FaEllipsisV, FaUserCircle } from 'react-icons/fa'; // For hamburger and dropdown icons
 import logo from '../../assets/ATALogo.png';
 import { userAuth } from '../../Context/Auth';
+import {   
+    BiLock,
+    BiLockOpenAlt,
+    BiLogIn,
+    BiLogOut,
+    BiSearch,
+    BiSolidDashboard,
+    BiUser,
+    BiUserCircle, } from 'react-icons/bi';
+
 
 
 function Header() {
@@ -132,8 +142,8 @@ function Header() {
                             )}
                         </div>
                     ) : (
-                        <Link to="/login" className="text-white">
-                            Login
+                        <Link to="/login" className="text-white bg-gray-500 rounded-md px-4 py-2 hover:bg-gold-primary">
+                            login                        
                         </Link>
                     )}  
                 </div>

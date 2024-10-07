@@ -121,6 +121,8 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema import StrOutputParser
 from langchain.schema.runnable import RunnablePassthrough
 from langchain_community.vectorstores import Chroma
+from rest_framework.decorators import api_view, permission_classes
+
 
 from .serializers import QuerySerializer
 
@@ -214,3 +216,58 @@ class QueryView(APIView):
             return Response({'response': response}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+from google.cloud import dialogflow_v2beta1 as dialogflow
+@api_view(["POST"])
+def detect_intent_knowledge(request):
+    data = request.data
+    project_id = data.get("project_id")
+    session_id = data.get("session_id")
+    language_code = data.get("language_code")
+    knowledge_base_id = data.get("knowledge_base_id")
+    texts = data.get("texts")
+
+    """Returns the result of detect intent with querying Knowledge Connector.
+
+    Args:
+    project_id: The GCP project linked with the agent you are going to query.
+    session_id: Id of the session, using the same `session_id` between requests
+              allows continuation of the conversation.
+    language_code: Language of the queries.
+    knowledge_base_id: The Knowledge base's id to query against.
+    texts: A list of text queries to send.
+    """
+
+    session_client = dialogflow.SessionsClient( )
+
+    session_path = session_client.session_path(project_id, session_id)
+    responses = []
+
+    for text in texts:
+        text_input = dialogflow.TextInput(text=text, language_code=language_code)
+
+        query_input = dialogflow.QueryInput(text=text_input)
+
+        knowledge_base_path = dialogflow.KnowledgeBasesClient.knowledge_base_path(
+            project_id, knowledge_base_id
+        )
+
+        query_params = dialogflow.QueryParameters(
+            knowledge_base_names=[knowledge_base_path]
+        )
+
+        request = dialogflow.DetectIntentRequest(
+            session=session_path, query_input=query_input, query_params=query_params
+        )
+        response = session_client.detect_intent(request=request)
+        response_data = {
+            "query_text": response.query_result.query_text,
+            "intent": response.query_result.intent.display_name,
+            "intent_confidence": response.query_result.intent_detection_confidence,
+            "fulfillment_text": response.query_result.fulfillment_text,
+        }
+
+        responses.append(response_data)
+
+        return Response(responses)
+

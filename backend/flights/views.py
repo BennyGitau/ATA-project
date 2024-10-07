@@ -124,19 +124,18 @@ class FlightsSearchView(APIView):
                 adults=1,
                 # returnDate='',
                 # travelClass='',
-                # max=5,
+                max=5,
                 # maxPrice='',
                 # children=0,
                 # infants=0,
                 # currencyCode='EUR',
                 # nonStop='false',
                 # includedAirlineCodes='',
-                )
-            response_data = response.data
-            if response_data:
-                cache.set(cache_key, response_data, cache_timeout)
+                ).data
+            if response:
+                cache.set(cache_key, response, cache_timeout)
                 return Response({
-                    'flights':response_data,
+                    'flights':response,
                     'cache_key': cache_key
                     }, status=status.HTTP_200_OK)
             #save the cache
@@ -157,55 +156,38 @@ class FlightAvailabilityView(APIView):
             },
     )
     def post(self, request):
-        serializer = FlightBookingSerializer(data=request.data) 
+        serializer = FlightBookingSerializer(data=request.data)
         if serializer.is_valid():
-            travelers_data = serializer.create(serializer.validated_data)
-        
-        try:
-            '''
-            Confirm availability and price from SYD to BKK in summer 2022 //add the flight offer from f/
-            '''
-            flights = amadeus.shopping.flight_offers_search.get(originLocationCode='SYD', destinationLocationCode='BKK',
-                                                                departureDate='2022-07-01', adults=1).data
-            response_one_flight = amadeus.shopping.flight_offers.pricing.post(
-                flights[0])
-            # print(response_one_flight.data)
+            body = {
+            "originDestinations": [
+                {
+                    "id": "1",
+                    "originLocationCode": "MIA",
+                    "destinationLocationCode": "ATL",
+                    "departureDateTime": {
+                        "date": "2022-11-01"
+                    }
+                }
+            ],
+            "travelers": [
+                {
+                    "id": "1",
+                    "travelerType": "ADULT"
+                }
+            ],
+            "sources": [
+                "GDS"
+            ]
+            }
 
-            response_two_flights = amadeus.shopping.flight_offers.pricing.post(
-                flights[0:2])
-            print(response_two_flights.data)
-        except ResponseError as error:
-            raise error
-        
-        # #flight availability search
+            try:
+                response = amadeus.shopping.flight_offers.post(body).data
+                return Response(response, status=status.HTTP_200_OK)
+            except ResponseError as error:
+                raise error
 
-        # try:
-        #     body = {
-        #         "originDestinations": [
-        #             {
-        #                 "id": "1",
-        #                 "originLocationCode": "MIA",
-        #                 "destinationLocationCode": "ATL",
-        #                 "departureDateTime": {
-        #                     "date": "2022-11-01"
-        #                 }
-        #             }
-        #         ],
-        #         "travelers": [
-        #             {
-        #                 "id": "1",
-        #                 "travelerType": "ADULT"
-        #             }
-        #         ],
-        #         "sources": [
-        #             "GDS"
-        #         ]
-        #     }
 
-        #     response = amadeus.shopping.availability.flight_availabilities.post(body)
-        #     print(response.data)
-        # except ResponseError as error:
-        #     raise error
+
         
         # #seatmap display of flight in an order    
         # try:
@@ -235,6 +217,22 @@ class FlightAvailabilityView(APIView):
         #     raise error
 
         #flight create order
+#seatmap of an offer
+class FlightOfferSeatmapView(APIView):
+    def post(self, request):
+        flight_offer_id = request.data.get('flight_offer_id')
+        cache_key = request.data.get('cache_key')
+        
+        flight_offers = cache.get(cache_key)
+        flight_offer = flight_offers.get(flight_offer_id)
+        if not flight_offer:
+            return Response({"error": "Flight not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            response = amadeus.shopping.seatmaps.post(flight_offer).data
+            return Response(response, status=status.HTTP_200_OK)
+        except ResponseError as error:
+            raise error
 class FlightBookingView(APIView):
     @swagger_auto_schema(
         operation_description="Flight booking",

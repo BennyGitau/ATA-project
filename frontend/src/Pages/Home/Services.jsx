@@ -71,7 +71,7 @@ function Services() {
       
       <section className='flex justify-center flex-col md:flex-row flex-1 gap-4 md:justify-between border-b border-gray-500  w-full md:w-[80%]  mx-auto mt-8'>
         <ServiceImage title="Get Charter Quotation" src={CharterImg} />
-        <ServiceImage title="Get Flight Quotation" src={FlightImg} link="/flightbooking" />
+        <ServiceImage title="Get Flight Quotation" src={FlightImg} link="/search" />
         <ServiceImage title="Get Tour Quotation" src={TourImg} />
       </section>
       <section className='w-[80%] mx-auto mt-10 '>

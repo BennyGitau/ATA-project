@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'itinerary',
     'corsheaders',
     'assistant',
+    'infocenter',
+    'documents',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +66,9 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Add your frontend's origin (adjust port if necessary)
 ]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
+
 
 CORS_ALLOW_ALL_ORIGINS = True
 

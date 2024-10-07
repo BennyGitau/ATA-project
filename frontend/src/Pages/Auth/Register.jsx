@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { userAuth } from '../../Context/Auth';
 import { Link } from 'react-router-dom';
+import Layout from '../../Components/Layout/Layout';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -66,11 +67,11 @@ function Register() {
   };
 
   return (
-    <div className="max-w-md mx-auto h-screen my-auto p-6 bg-white shadow-md rounded-lg">
+    <div className="max-w-md mx-auto  my-auto p-6 bg-gray-200 shadow-md rounded-lg">
       <h1 className="text-2xl font-bold mb-4">Register</h1>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {registerMessage && <p className="mt-4 text-green-500">{registerMessage}</p>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className=''>
         <div className="mb-4">
           <label className="block mb-2 text-sm font-medium">Select Level</label>
           <select name="role" value={formData.role} onChange={handleChange} className="w-full p-2 border border-gray-300 rounded">

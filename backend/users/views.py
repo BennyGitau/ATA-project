@@ -141,11 +141,15 @@ def login_user(request):
     
 
 #logout view
-@permission_classes([IsAuthenticated])
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+# @permission_classes([IsAuthenticated])
 @api_view(['POST'])
 def logout_user(request):
-    logout(request)
-    return HttpResponseRedirect('http://localhost:5173/login')
+    if request.method == 'POST':    
+        logout(request)
+        return HttpResponseRedirect('http://localhost:5173/login')
 
 #password_reset view
 #password_reset_confirm default override

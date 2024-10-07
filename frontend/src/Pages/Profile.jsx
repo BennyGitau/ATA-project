@@ -1,8 +1,11 @@
-import React from 'react'
+import React from 'react';
+import Layout from '../Components/Layout/Layout';
 
 function Profile() {
   return (
+    <Layout>
     <div>Profile</div>
+    </Layout>
   )
 }
 

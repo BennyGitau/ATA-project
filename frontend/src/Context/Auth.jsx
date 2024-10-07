@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, usememo } from 'react';
 import axios from 'axios';
 import { toast } from "react-toastify";
+import { useNavigate } from 'react-router-dom';
 // import "react-toastify/dist/ReactToastify.css";
 // import Cookies from "js-cookie";
 
@@ -13,7 +14,9 @@ export const UserProvider = ({ children }) => {
     const [registerMessage, setRegisterMessage] = useState('');
     const [passwordResetMessage, setPasswordResetMessage] = useState('');
     const [loginMessage, setLoginMessage] = useState('');
-    const [isLoggedIn, setIsLoggedIn] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);    
+    const [flights, setFlights] = useState([]);
+
 
     const handleRegister = async (data) => {
         try {
@@ -32,6 +35,7 @@ export const UserProvider = ({ children }) => {
         }
     }
 
+    const navigate = useNavigate();
     const handleLogin = async (data) => {
         try {
             const response = await axios.post('http://127.0.0.1:8000/api/login/', data);
@@ -39,11 +43,13 @@ export const UserProvider = ({ children }) => {
             if(response.status === 200) {
                 setUser(response.data.user);
                 setLoading(false);
-                // setIsLoggedIn(true);
+                setIsLoggedIn(true);
+                navigate('/');
                 localStorage.setItem('authToken', response.data.token);
                 localStorage.setItem('refreshToken', response.data.refresh);
                 toast.success('Login successful!', {theme: "colored", autoClose: 3000});
                 console.log(response.data);
+
             } else {
                 setLoading(false);
                 console.log(response.data.error);
@@ -70,9 +76,13 @@ export const UserProvider = ({ children }) => {
     
     const handleLogout = async () => {
         try {
-            const response = await axios.post('http://127.0.0.1:8000/api/logout/');
+            const response = await axios.post('http://127.0.0.1:8000/api/logout/', {refresh: localStorage.getItem('token')});
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('refreshToken');
             setUser(null);
             setLoading(false);
+            setIsLoggedIn(false);
+            navigate('/');
         } catch (error) {
             console.error(error);
             setLoading(false);
@@ -124,9 +134,20 @@ export const UserProvider = ({ children }) => {
         }
     }
 
+    //flight search
+    async function searchFlights(formData) {
+        try {
+            const response = await axios.post('http://localhost:8000/flights/', formData);
+            setFlights(response.data.flights);
+            console.log(response.data.flights);
+        } catch (error) {
+            console.error('Error: ' + error.message);
+        } 
+    }
+
     useEffect(() => {
         getProfile();
-    }, [user]);
+    }, []);
     return (
         <UserContext.Provider value={{ 
             user, 
@@ -136,6 +157,8 @@ export const UserProvider = ({ children }) => {
             loginMessage,
             passwordChangeMsg,
             isLoggedIn,
+            flights,
+            searchFlights,
             updatePassword,
             passwordReset,
             handleRegister,

@@ -1,5 +1,7 @@
 import React from 'react';
 import BannerImg from '../assets/Home/BannerImage.jpg';
+import Layout from '../Components/Layout/Layout';
+
 
 function OurBlog() {
   const blogPosts = [
@@ -24,6 +26,7 @@ function OurBlog() {
   ];
 
   return (
+    <Layout>
     <div className="min-h-screen bg-gray-100">
       {/* Banner */}
       <div className="bg-cover bg-center h-80 relative" style={{ backgroundImage: `url(${BannerImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
@@ -51,6 +54,7 @@ function OurBlog() {
         </div>
       </div>
     </div>
+    </Layout>
   );
 };
 
